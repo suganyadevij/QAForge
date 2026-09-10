@@ -35,18 +35,29 @@ export default defineConfig({
 
   /* Configure projects for major browsers */
   projects: [
+    // API tests use only Playwright's `request` fixture (no browser), so they
+    // are split into their own project and matched to tests/api only. This
+    // keeps them from being launched once per UI browser project below.
+    {
+      name: 'api',
+      testDir: './tests/api',
+    },
+
     {
       name: 'chromium',
+      testDir: './tests/ui',
       use: { ...devices['Desktop Chrome'] },
     },
 
     {
       name: 'firefox',
+      testDir: './tests/ui',
       use: { ...devices['Desktop Firefox'] },
     },
 
     {
       name: 'webkit',
+      testDir: './tests/ui',
       use: { ...devices['Desktop Safari'] },
     },
 
