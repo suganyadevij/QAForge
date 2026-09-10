@@ -33,7 +33,7 @@ pipeline {
         stage('Run Tests') {
             steps {
                 withCredentials([usernamePassword(
-                    credentialsId: 'qaforge-test-account',
+                    credentialsId: '12d2466b-9aff-486e-b9b9-94318c63d4b4',
                     usernameVariable: 'EMAIL',
                     passwordVariable: 'PASSWORD'
                 )]) {
