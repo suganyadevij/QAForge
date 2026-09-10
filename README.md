@@ -59,14 +59,18 @@ Playwright-Practice/
 │   └── apiFixtures.ts    # injects an authenticated tasksApi into API tests
 ├── utils/
 │   └── testData.ts       # shared static test data
-└── tests/
-    ├── api/
-    │   ├── tasks.api.spec.ts
-    │   └── tasks-api-failure.spec.ts
-    └── ui/
-        ├── login.spec.ts
-        ├── task-completion.spec.ts
-        └── tasks-create.spec.ts
+├── tests/
+│   ├── auth.setup.ts
+│   ├── api/
+│   │   ├── tasks.api.spec.ts
+│   │   └── tasks-api-failure.spec.ts
+│   └── ui/
+│       ├── login.spec.ts
+│       ├── task-completion.spec.ts
+│       └── tasks-create.spec.ts
+└── playwright/
+    └── .auth/
+        └── user.json   # generated at runtime, not committed
 ```
 
 ## 6. UI Automation
@@ -75,6 +79,18 @@ UI tests drive the task board through two Page Object classes:
 
 - **`LoginPage`** — `navigate()` goes to `/login`; `login(email, password)` fills credentials and submits.
 - **`TasksPage`** — encapsulates task board interactions including task creation, completion via drag-and-drop, lookup, and deletion.
+
+## Authentication & storageState
+
+The framework uses a dedicated Playwright **setup project**, defined in `tests/auth.setup.ts`, to avoid repeating UI login for every authenticated test:
+
+- The setup project logs in through `LoginPage` using the `EMAIL` and `PASSWORD` environment variables.
+- On successful login, Playwright saves the authenticated browser context to `playwright/.auth/user.json` via `page.context().storageState({ path: authFile })`.
+- This file is generated at runtime only — it is **never committed to GitHub**. `playwright/.auth/` is listed in `.gitignore`.
+- The `chromium` and `firefox` projects declare `dependencies: ['setup']` and set `storageState: 'playwright/.auth/user.json'`, so they reuse the saved session and business-flow tests (task creation, completion, etc.) start already logged in.
+- `login.spec.ts` explicitly overrides this with `test.use({ storageState: undefined })`, since the login test's own purpose is to validate the login flow itself and must start from an unauthenticated context.
+- API tests are unaffected by any of this — they continue to authenticate independently through `apiFixtures.ts` / `AuthApi`, using a Bearer token rather than browser storage state.
+- In CI/Jenkins, `playwright/.auth/user.json` is generated fresh during the build (the `setup` project runs as part of the test execution) using the `EMAIL`/`PASSWORD` values injected securely via Jenkins Credentials Binding — the file is never stored in or pulled from the repository.
 
 ## 7. API Automation
 

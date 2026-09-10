@@ -34,7 +34,11 @@ export default defineConfig({
   },
 
   /* Configure projects for major browsers */
-  projects: [
+  projects: [  
+    {
+    name: 'setup',
+    testMatch: /auth\.setup\.ts/,
+  },  
     // API tests use only Playwright's `request` fixture (no browser), so they
     // are split into their own project and matched to tests/api only. This
     // keeps them from being launched once per UI browser project below.
@@ -46,13 +50,20 @@ export default defineConfig({
     {
       name: 'chromium',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Chrome'] },
-    },
+      dependencies: ['setup'],
+      use: {
+         ...devices['Desktop Chrome'] ,
+        storageState: 'playwright/.auth/user.json',
+      },
+    },      
 
     {
       name: 'firefox',
       testDir: './tests/ui',
-      use: { ...devices['Desktop Firefox'] },
+      dependencies: ['setup'],
+      use: { ...devices['Desktop Firefox'] , 
+        storageState: 'playwright/.auth/user.json',
+      },      
     },
 
     {
