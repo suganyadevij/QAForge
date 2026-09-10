@@ -45,7 +45,7 @@ pipeline {
 
     post {
         always {
-            archiveArtifacts artifact: 'playwright-report/**', allowEmptyArchive: true, fingerprint: false
+            archiveArtifacts artifacts: 'playwright-report/**', allowEmptyArchive: true, fingerprint: false
 
             script {
                 if (fileExists('playwright-report/index.html')) {
